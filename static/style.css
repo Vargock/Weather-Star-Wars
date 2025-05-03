@@ -78,12 +78,107 @@ body {
   color: white;
   letter-spacing: 1px;
   font-weight: bold;
-  top: 72%;
-  right: 16%;
+  top: 75%;
+  right: 15%;
   font-size: 1.5rem;
   text-align: right;
   width: -moz-fit-content;
   width: fit-content;
   max-width: 50%;
   z-index: 2;
+}
+
+@media (max-width: 800px) {
+  .planet__before {
+    top: -5px;
+    left: -5px;
+    font-size: 1.5rem;
+  }
+  .planet__after {
+    bottom: -10px;
+    right: -5px;
+    font-size: 1.5rem;
+  }
+  .planet__name {
+    font-size: 15vw;
+    letter-spacing: 5px;
+    padding: 5px 10px;
+  }
+  .info {
+    font-size: 4vw;
+    top: 35px;
+    left: 0;
+    text-align: center;
+    right: 0;
+  }
+  .commentary {
+    font-size: 1.2rem;
+    max-width: 80%;
+    left: auto;
+    right: auto;
+    text-align: center;
+  }
+}
+@media (max-width: 800px) and (orientation: landscape) {
+  .info {
+    top: 10px;
+    right: 10px;
+    left: auto;
+    text-align: right;
+    margin: 0;
+  }
+  .commentary {
+    bottom: 10px;
+    left: 10px;
+    right: auto;
+    top: auto;
+    text-align: left;
+    max-width: 70%;
+  }
+}
+@media (max-width: 480px) {
+  .planet__before, .planet__after {
+    font-size: 1.2rem;
+  }
+  .planet__name {
+    font-size: 18vw;
+    letter-spacing: 3px;
+  }
+  .info {
+    font-size: 5vw;
+    top: 30px;
+    left: 0;
+    text-align: center;
+    right: 0;
+  }
+  .commentary {
+    font-size: 1rem;
+    top: 77%;
+    right: 5%;
+    max-width: 90%;
+  }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .planet__before, .planet__after {
+    font-size: 2rem;
+  }
+  .planet__name {
+    font-size: 14vw;
+    letter-spacing: 4px;
+  }
+  .info {
+    font-size: 5vh;
+    top: 10px;
+    right: 10px;
+    left: auto;
+    margin: 0;
+    text-align: right;
+  }
+  .commentary {
+    font-size: 5vh;
+    top: 335px;
+    left: auto;
+    right: auto;
+    text-align: center;
+  }
 }/*# sourceMappingURL=style.css.map */

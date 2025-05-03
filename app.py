@@ -1,111 +1,161 @@
 import requests
+import random
 from flask import Flask, render_template
 
 API_URL = "https://api.open-meteo.com/v1/forecast?"
 # Dictionary of Star Wars planets' conditions to which your local weather conditions will be compared to
 PLANETS = {
     "Tatooine": {
-        "temperature": 40,  # Hot desert
-        "rain": 0,  # No rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 20,  # Windy
-        "visibility": 10000,  # Clear
-        "commentary": "I'd tell you to be wary of Tusken Raiders, but... the heat will probably kill you sooner",
+        "temperature": 40,
+        "rain": 0,
+        "snowfall": 0,
+        "wind_speed": 20,
+        "visibility": 10000,
+        "commentary": [
+            "I'd tell you to be wary of Tusken Raiders, but... the heat will probably kill you sooner.",
+            "Two suns, no shade  —grab a droid and head to Mos Eisley before you fry!",
+            "Sandstorms incoming!",
+            "This Tatooine scorcher makes a podrace feel like a breeze!",
+        ],
         "color": "rgba(245, 200, 150, 0.4)",
         "image_path": "/static/images/tatooine.jpg",
     },
     "Hoth": {
-        "temperature": -40,  # Freezing
-        "rain": 0,  # No rain
-        "snowfall": 10,  # Heavy snow
-        "wind_speed": 30,  # Very windy
-        "visibility": 500,  # Low due to snow
-        "commentary": "Bundle up or find a tauntaun to stay warm!",
+        "temperature": -40,
+        "rain": 0,
+        "snowfall": 10,
+        "wind_speed": 30,
+        "visibility": 500,
+        "commentary": [
+            "Bundle up or find a tauntaun to stay warm!",
+            "Wampa alert! Stay inside unless you want to be an ice sculpture.",
+            "Blizzard on Hoth? More likely than you think!",
+            "Echo Base is buried in snow again. Stay frosty out there!",
+        ],
         "color": "rgba(200, 220, 255, 0.4)",
         "image_path": "/static/images/hoth.webp",
     },
     "Endor": {
-        "temperature": 20,  # Temperate forest
-        "rain": 5,  # Light rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 10,  # Breezy
-        "visibility": 6000,  # Good visibility
-        "commentary": "Watch for Ewoks, they are in the trees!",
+        "temperature": 20,
+        "rain": 5,
+        "snowfall": 0,
+        "wind_speed": 10,
+        "visibility": 6000,
+        "commentary": [
+            "Watch for Ewoks, they are in the trees!",
+            "Light rain on Endor, who could have thought of such a thing?",
+            "Misty forests and chirping Ewoks — keep your blaster dry in this drizzle.",
+            "Why would Wookiee, 8-foot-tall, want to live on Endor, with a bunch of 2-foot-tall Ewoks?",
+        ],
         "color": "rgba(100, 150, 100, 0.4)",
         "image_path": "/static/images/endor.jpg",
     },
     "Mustafar": {
-        "temperature": 50,  # Volcanic heat
-        "rain": 0,  # No rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 15,  # Moderate wind
-        "visibility": 3000,  # Hazy due to ash
-        "commentary": "GET IN SHADE, NOW",
+        "temperature": 50,
+        "rain": 0,
+        "snowfall": 0,
+        "wind_speed": 15,
+        "visibility": 3000,
+        "commentary": [
+            "GET IN SHADE, NOW — unless you want to melt.",
+            "Mustafar’s lava flows are extra toasty today. Avoid the high ground!",
+            "Ash and heat — beatiful sights! For a sith...",
+            "Lava rivers are bubbling. Watch your step!",
+        ],
         "color": "rgba(128, 53, 17, 0.4)",
         "image_path": "/static/images/mustafar.jpg",
     },
     "Alderaan": {
-        "temperature": 0,  # Placeholder for missing data
+        "temperature": 0,
         "rain": 0,
         "snowfall": 0,
         "wind_speed": 0,
         "visibility": 0,
-        "commentary": "Are you sure you're in the right place? There's nothing here!",
-        "color": None,
+        "commentary": [
+            "Are you sure you're in the right place? There's nothing here!",
+            "Alderaan’s just a memory now — blame the Death Star for this cosmic void.",
+            "No weather, no planet — just the eerie silence of Alderaan’s remains.",
+            "Lost in space? Alderaan’s gone, and so’s any hope of a forecast!",
+        ],
+        "color": "rgba(0, 0, 0, 0.8)",
         "image_path": None,
     },
     "Kamino": {
-        "temperature": 22,  # Mild, oceanic
-        "rain": 20,  # Heavy rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 40,  # Stormy
-        "visibility": 2000,  # Low due to rain
-        "commentary": "Brace for the deluge — Kamino’s storms never quit!",
+        "temperature": 22,
+        "rain": 20,
+        "snowfall": 0,
+        "wind_speed": 40,
+        "visibility": 2000,
+        "commentary": [
+            "Brace for the deluge — Kamino’s storms never quit!",
+            "Rain’s pounding Kamino’s oceans — hope you aren't outside",
+            "Stormy seas and howling winds — Kamino’s forecast rarely changes!",
+            "Kamino’s waves are crashing, so try not to go swimming.",
+        ],
         "color": "rgba(100, 150, 200, 0.4)",
         "image_path": "/static/images/kamino.jpg",
     },
     "Dagobah": {
-        "temperature": 28,  # Warm, swampy
-        "rain": 4,  # Light to moderate drizzle
-        "snowfall": 0,  # No snow
-        "wind_speed": 5,  # Calm
-        "visibility": 1000,  # Foggy
-        "commentary": "Tread lightly — all mannet of things dwell in this foggy swamp!",
+        "temperature": 28,
+        "rain": 4,
+        "snowfall": 0,
+        "wind_speed": 5,
+        "visibility": 1000,
+        "commentary": [
+            "Tread lightly — all manner of things dwell in this foggy swamp!",
+            "Dagobah’s mists hide Yoda… and some nasty swamp creatures. Watch your step!",
+            "Drizzle and fog—perfect for Jedi training, terrible for dry boots.",
+            "This swamp’s humidity is strong with the Force. Seek Yoda, but don’t get stuck!",
+        ],
         "color": "rgba(100, 120, 80, 0.4)",
         "image_path": "/static/images/dagobah.jpg",
     },
     "Bespin": {
-        "temperature": 15,  # Cool, high-altitude
-        "rain": 2,  # Light rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 50,  # Very windy
-        "visibility": 4000,  # Cloudy
-        "commentary": "Be careful when flying! Well, also just in general",
+        "temperature": 15,
+        "rain": 2,
+        "snowfall": 0,
+        "wind_speed": 50,
+        "visibility": 4000,
+        "commentary": [
+            "Be careful when flying! Well, also just in general.",
+            "Cloud City’s winds are fierce — hold onto your cape, Lando!",
+            "Bespin’s skies are gusty today. Don’t fall off those floating platforms!",
+            "High-altitude chills and howling winds—Bespin’s not for the faint-hearted.",
+        ],
         "color": "rgba(206, 179, 152, 0.4)",
         "image_path": "/static/images/bespin.jpg",
     },
     "Naboo": {
-        "temperature": 25,  # Warm, pleasant
-        "rain": 1,  # Very light rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 8,  # Gentle breeze
-        "visibility": 12000,  # Clear
-        "commentary": "Enjoy the clear weather, but be wary of Gungans...",
+        "temperature": 25,
+        "rain": 1,
+        "snowfall": 0,
+        "wind_speed": 8,
+        "visibility": 12000,
+        "commentary": [
+            "Enjoy the clear weather, but be wary of Gungans...",
+            "Naboo’s sunny plains are perfect! Especially for someone who abhors sand...",
+            "Light breeze, clear skies — perfect time for a picnic with the Queen!",
+            "Naboo’s beauty shines today. Just don’t mention the Trade Federation.",
+        ],
         "color": "rgba(113, 166, 155, 0.4)",
         "image_path": "/static/images/naboo.jpeg",
     },
     "Geonosis": {
-        "temperature": 45,  # Extremely hot
-        "rain": 0,  # No rain
-        "snowfall": 0,  # No snow
-        "wind_speed": 25,  # Dusty winds
-        "visibility": 3000,  # Low due to dust
-        "commentary": "Hot and dry... also droid factories and flying bugs, but just ignore them.",
+        "temperature": 45,
+        "rain": 0,
+        "snowfall": 0,
+        "wind_speed": 25,
+        "visibility": 3000,
+        "commentary": [
+            "Hot and dry... also droid factories and flying bugs, but just ignore them.",
+            "Geonosis’s dust storms are brutal, Geonosians are worse.",
+            "Scorching heat and droid clankers — welcome to Geonosis’s arena!",
+            "This arid wasteland’s buzzing with trouble. Stay sharp or get stung!",
+        ],
         "color": "rgba(200, 152, 100, 0.4)",
         "image_path": "/static/images/geonosis.jpg",
     },
 }
-
 
 app = Flask(__name__)
 
@@ -152,7 +202,7 @@ def index():
 
 def location_lookup() -> dict:
     try:
-        location = requests.get("http://ipinfo.io/json").json()
+        location = requests.get(f"http://ipinfo.io/json").json()
         return location
     except Exception as e:
         print(e)
@@ -225,7 +275,7 @@ def find_closest_planet(local_data: dict) -> str:
             # closest_planet = "Tatooine"
             # closest_planet = "Mustafar"
 
-            planet_commentary = PLANETS[closest_planet]["commentary"]
+            planet_commentary = random.choice(PLANETS[closest_planet]["commentary"])
             planet_color = PLANETS[closest_planet]["color"]
             planet_image_path = PLANETS[closest_planet]["image_path"]
 

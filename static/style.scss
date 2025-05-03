@@ -1,97 +1,213 @@
-// 
-
+//
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Orbitron", sans-serif;
-  }
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Orbitron", sans-serif;
+}
 
-body{
-    height: 100vh;
-    background-size: cover;
-    background-position: center;
-    color: #ffd700;
-    text-shadow: 2px 2px 4px #000; /* Black outline for readability */
-    overflow: hidden;
-    position: relative;    
+body {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px #000; /* Black outline for readability */
+  overflow: hidden;
+  position: relative;
 }
 .container {
-    height: 100%;
-    width: 100%;
-    display: flex; 
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; 
-    position: relative;
-    z-index: 2;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
 }
 
 .planet {
-    &__wrapper {
-        display: inline-flex; 
-        position: relative; 
-    }
+  &__wrapper {
+    display: inline-flex;
+    position: relative;
+  }
 
-    &__before {
-        position: absolute;
-        top: -10px; // Upper-left corner
-        left: -10px; // Close to left edge
-        font-size: 2.5rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        border-radius: 5px;
-        z-index: 2;
-    }
+  &__before {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 5px;
+    z-index: 2;
+  }
 
-    &__after {
-        position: absolute;
-        bottom: -20px; // Lower-right corner
-        right: -10px; // Close to right edge
-        font-size: 2.5rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        border-radius: 5px;
-        z-index: 2;
-    }
+  &__after {
+    position: absolute;
+    bottom: -20px;
+    right: -10px;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 5px;
+    z-index: 2;
+  }
 
-    &__name {
-        position: relative;
-        font-size: 10rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 10px;
-        transition: transform 0.2s;
-        padding: 10px 20px;
-        z-index: 2;
+  &__name {
+    position: relative;
+    font-size: 10rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 10px;
+    transition: transform 0.2s;
+    padding: 10px 20px;
+    z-index: 2;
 
-        &:hover {
-            transform: scale(1.1);
-        }
+    &:hover {
+      transform: scale(1.1);
     }
-   
+  }
 }
 
 .info {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    font-size: 1.5rem;
-    opacity: 0.8;
-    z-index: 2;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  font-size: 1.5rem;
+  opacity: 0.8;
+  z-index: 2;
 }
 
 .commentary {
-    position: absolute;
-    color: white;
-    letter-spacing: 1px;
-    font-weight: bold;
-    top: 72%;
-    right: 16%;
-    font-size: 1.5rem;
+  position: absolute;
+  color: white;
+  letter-spacing: 1px;
+  font-weight: bold;
+  top: 75%;
+  right: 15%;
+  font-size: 1.5rem;
+  text-align: right;
+  width: fit-content;
+  max-width: 50%;
+  z-index: 2;
+}
+
+@media (max-width: 800px) {
+  .planet {
+    &__before {
+      top: -5px;
+      left: -5px;
+      font-size: 1.5rem;
+    }
+
+    &__after {
+      bottom: -10px;
+      right: -5px;
+      font-size: 1.5rem;
+    }
+
+    &__name {
+      font-size: 15vw;
+      letter-spacing: 5px;
+      padding: 5px 10px;
+    }
+  }
+
+  .info {
+    font-size: 4vw;
+    top: 35px;
+    left: 0;
+    text-align: center;
+    right: 0;
+  }
+
+  .commentary {
+    font-size: 1.2rem;
+    max-width: 80%;
+    left: auto;
+    right: auto;
+    text-align: center;
+  }
+
+  // Landscape orientation overrides
+  @media (orientation: landscape) {
+    .info {
+      top: 10px;
+      right: 10px;
+      left: auto;
+      text-align: right;
+      margin: 0;
+    }
+
+    .commentary {
+      bottom: 10px;
+      left: 10px;
+      right: auto;
+      top: auto;
+      text-align: left;
+      max-width: 70%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .planet {
+    &__before,
+    &__after {
+      font-size: 1.2rem;
+    }
+
+    &__name {
+      font-size: 18vw;
+      letter-spacing: 3px;
+    }
+  }
+
+  .info {
+    font-size: 5vw;
+    top: 30px;
+    left: 0;
+    text-align: center;
+    right: 0;
+  }
+
+  .commentary {
+    font-size: 1rem;
+    top: 77%;
+    right: 5%;
+    max-width: 90%;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .planet {
+    &__before,
+    &__after {
+      font-size: 2rem;
+    }
+
+    &__name {
+      font-size: 14vw;
+      letter-spacing: 4px;
+    }
+  }
+
+  .info {
+    font-size: 5vh;
+    top: 10px;
+    right: 10px;
+    left: auto;
+    margin: 0;
     text-align: right;
-    width: fit-content;
-    max-width: 50%;
-    z-index: 2;
+  }
+
+  .commentary {
+    font-size: 5vh;
+    top: 335px;
+    left: auto;
+    right: auto;
+    text-align: center;
+  }
 }
