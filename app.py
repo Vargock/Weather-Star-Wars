@@ -1,6 +1,6 @@
 import requests
 import random
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 API_URL = "https://api.open-meteo.com/v1/forecast?"
 # Dictionary of Star Wars planets' conditions to which your local weather conditions will be compared to
@@ -162,32 +162,37 @@ app = Flask(__name__)
 
 class LocData:
     def __init__(self, weather_data, loc_data):
-        data = weather_data["current"]  # Weather Values
-        units = weather_data["current_units"]  # Weather Units
 
-        self.city = loc_data["city"]  # User's city
-        self.country = loc_data["country"]  # User's country
+        if loc_data:
+            data = weather_data["current"]
+            units = weather_data["current_units"]
+            self.city = loc_data["city"]
+            self.country = loc_data["country"]
+            self.temp_float = data["temperature_2m"]
+            self.temp_unit = units["temperature_2m"]
+            self.temp_tuple = self.temp_float, self.temp_unit
+            self.temp_str = f"{str(self.temp_float)} {self.temp_unit}"
+            self.rain = data["rain"]
+            self.snowfall = data["snowfall"]
+            self.wind = data["wind_speed_10m"]
+            self.visibility = data["visibility"]
 
-        self.temp_float = data["temperature_2m"]
-        self.temp_unit = units["temperature_2m"]
-        self.temp_tuple = self.temp_float, self.temp_unit
-        self.temp_str = f"{str(self.temp_float)} {self.temp_unit}"
-
-        self.rain = data["rain"]
-        self.snowfall = data["snowfall"]
-        self.wind = data["wind_speed_10m"]
-        self.visibility = data["visibility"]
+        else:
+            self.city = "Unknown"
+            self.country = "Unknown"
+            self.temp_float = 0
+            self.temp_unit = "°C"
+            self.temp_tuple = (0, "°C")
+            self.temp_str = "0 °C"
+            self.rain = 0
+            self.snowfall = 0
+            self.wind = 0
+            self.visibility = 0
 
 
 @app.route("/")
 def index():
     weather_data = fetch_loc_and_temp()
-
-    print(
-        f"Local weather: temp={weather_data.temp_float}, rain={weather_data.rain}, "
-        f"snow={weather_data.snowfall}, wind={weather_data.wind}, vis={weather_data.visibility}"
-    )
-
     closest_planet, commentary, color, image = find_closest_planet(weather_data)
     return render_template(
         "index.html",
@@ -202,19 +207,38 @@ def index():
 
 def location_lookup() -> dict:
     try:
-        location = requests.get(f"http://ipinfo.io/json").json()
+        # Get client IP from environ (PythonAnywhere-specific)
+        user_ip = (
+            request.environ.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
+            or request.environ.get("REMOTE_ADDR")
+            or request.headers.get("X-Real-IP")
+            or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+            or (request.access_route[0] if request.access_route else None)
+        )
+        if not user_ip:
+            return {}
+        # url = f"http://ipinfo.io/json"
+        # Call ipinfo.io
+        url = f"http://ipinfo.io/{user_ip}/json"
+
+        response = requests.get(url, timeout=5)
+        location = response.json()
+
+        if not location or "loc" not in location:
+            return {}
         return location
     except Exception as e:
-        print(e)
+        return {}
 
 
 def get_coords(location: dict) -> list[str]:
+    if not isinstance(location, dict) or not location or "loc" not in location:
+        return ["0", "0"]
     coords = location["loc"].split(",")
-    # print(coords)
     return coords
 
 
-def find_closest_planet(local_data: dict) -> str:
+def find_closest_planet(local_data: LocData) -> tuple[str, str, str, str]:
     if local_data is None or (
         local_data.temp_float == 0
         and local_data.rain == 0
@@ -222,7 +246,12 @@ def find_closest_planet(local_data: dict) -> str:
         and local_data.wind == 0
         and local_data.visibility == 0
     ):
-        return "Alderaan"
+        return (
+            "Alderaan",
+            random.choice(PLANETS["Alderaan"]["commentary"]),
+            PLANETS["Alderaan"]["color"],
+            None,
+        )
 
     min_distance = float("inf")
     closest_planet = None
@@ -239,50 +268,34 @@ def find_closest_planet(local_data: dict) -> str:
 
         penalty = 0
         if planet == "Tatooine" and (local_data.rain > 0 or local_data.snowfall > 0):
-            penalty = 10000  # No rain/snow on Tatooine
+            penalty = 10000
         if planet == "Geonosis" and (local_data.rain > 0 or local_data.snowfall > 0):
-            penalty = 10000  # No rain/snow on Geonosis
+            penalty = 10000
         if planet == "Mustafar" and (local_data.rain > 0 or local_data.snowfall > 0):
-            penalty = 10000  # No rain/snow on Mustafar
+            penalty = 10000
         if planet == "Hoth" and local_data.snowfall < 1:
-            penalty = 10000  # Hoth needs snow
+            penalty = 10000
         if planet == "Naboo" and (local_data.rain > 5 or local_data.snowfall > 0):
-            penalty = 10000  # Naboo is pleasant, not stormy
+            penalty = 10000
         if planet == "Dagobah" and local_data.rain < 1:
-            penalty = 10000  # Dagobah needs some rain
-        if planet == "Yavin IV" and local_data.rain < 5:
-            penalty = 10000  # Yavin IV needs moderate rain
+            penalty = 10000
+        if planet == "Endor" and local_data.rain > 10:
+            penalty = 10000
 
         distance = temp_diff + rain_diff + snow_diff + wind_diff + vis_diff + penalty
-
-        print(
-            f"{planet}: temp_diff={temp_diff:.2f}, rain_diff={rain_diff:.2f}, "
-            f"snow_diff={snow_diff:.2f}, wind_diff={wind_diff:.2f}, vis_diff={vis_diff:.2f}, "
-            f"penalty={penalty}, distance={distance:.2f}"
-        )
 
         if distance < min_distance:
             min_distance = distance
             closest_planet = planet
-            # closest_planet = "Alderaan"
-            # closest_planet = "Dagobah"
-            # closest_planet = "Bespin"
-            # closest_planet = "Endor"
-            # closest_planet = "Geonosis"
-            # closest_planet = "Hoth"
-            # closest_planet = "Kamino"
-            # closest_planet = "Naboo"
-            # closest_planet = "Tatooine"
-            # closest_planet = "Mustafar"
 
-            planet_commentary = random.choice(PLANETS[closest_planet]["commentary"])
-            planet_color = PLANETS[closest_planet]["color"]
-            planet_image_path = PLANETS[closest_planet]["image_path"]
+    planet_commentary = random.choice(PLANETS[closest_planet]["commentary"])
+    planet_color = PLANETS[closest_planet]["color"]
+    planet_image_path = PLANETS[closest_planet]["image_path"]
 
     return closest_planet, planet_commentary, planet_color, planet_image_path
 
 
-def fetch_loc_and_temp() -> dict:
+def fetch_loc_and_temp() -> LocData:
     location = location_lookup()
     coords = get_coords(location)
     lat = float(coords[0])
@@ -295,7 +308,6 @@ def fetch_loc_and_temp() -> dict:
     try:
         weather = requests.get(full_url).json()
     except Exception as e:
-        print(f"Error fetching weather: {e}")
         return LocData(
             {
                 "current": {
