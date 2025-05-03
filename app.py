@@ -222,7 +222,7 @@ def find_closest_planet(local_data: dict) -> str:
             # closest_planet = "Hoth"
             # closest_planet = "Kamino"
             # closest_planet = "Naboo"
-            closest_planet = "Tatooine"
+            # closest_planet = "Tatooine"
             # closest_planet = "Mustafar"
 
             planet_commentary = PLANETS[closest_planet]["commentary"]
