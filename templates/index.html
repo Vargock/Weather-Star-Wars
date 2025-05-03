@@ -2,11 +2,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/style.css" />
     <title>Temperature in the Far Far Away</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <style>
+      body::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: {{color}}; /* Semi-transparent color overlay */
+          z-index: 1;
+      }
+      {% if planet and image_path %}
+      body { background-image: url({{ image_path }}); }
+      {% else %}
+      body { background-color: black; }
+      {% endif %}
+    </style>
   </head>
   <body>
-    <div>
-      Your city, {{city}}, is now experiencing the temperature of {{ temp }}
+    <div class="info">
+      <p>Weather in {{ city }}</p>
+      <p>Temperature: {{ temp }}</p>
     </div>
+    <div class="container">
+      <div class="planet__wrapper">
+        <p class="planet__before">It's like</p>
+        <h1 class="planet__name">{{ planet.upper() }}</h1>
+        <p></p>
+        <p class="planet__after">Outside</p>
+        <p class="planet__commentary">{{ commentary }}</p>
+      </div>
+    </div>
+
   </body>
 </html>
