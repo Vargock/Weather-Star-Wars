@@ -63,20 +63,6 @@ body {
 .planet__name:hover {
   transform: scale(1.1);
 }
-.planet__commentary {
-  position: absolute;
-  color: white;
-  letter-spacing: 1px;
-  font-weight: bold;
-  bottom: -150px;
-  right: -100px;
-  font-size: 1.5rem;
-  text-align: right;
-  width: -moz-fit-content;
-  width: fit-content;
-  max-width: 50%;
-  z-index: 2;
-}
 
 .info {
   position: absolute;
@@ -84,5 +70,20 @@ body {
   left: 30px;
   font-size: 1.5rem;
   opacity: 0.8;
+  z-index: 2;
+}
+
+.commentary {
+  position: absolute;
+  color: white;
+  letter-spacing: 1px;
+  font-weight: bold;
+  top: 72%;
+  right: 16%;
+  font-size: 1.5rem;
+  text-align: right;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 50%;
   z-index: 2;
 }/*# sourceMappingURL=style.css.map */
